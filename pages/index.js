@@ -1,65 +1,37 @@
 import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import useSWR from 'swr';
+import {fetcher, getProjectsUrl} from './../service/api';
+import Link from 'next/link'
+import { motion } from "framer-motion";
 
 export default function Home() {
+  const { data, error }  = useSWR(getProjectsUrl(), fetcher);
+
+  if(!data) {
+    return(<div>Loading</div>);
+  }
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
+    <div className="container mx-auto my-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-5">
+        {data.data.map((item, key) => (
+          <Link href={`/project/${item.slug}`} key={key}>
+            <a>
+              <div className="rounded bg-gray-100">
+                <motion.figure className="image" layoutId={`image-${item.id}`}>
+                  <img src={item._embedded['wp:featuredmedia'][0].source_url} className="object-cover h-48 w-full rounded" />
+                </motion.figure>
+                <motion.h1 
+                  className="text-xl text-purple-600 p-2"
+                  layoutId={`title-${item.id}`}
+                >
+                  {item.title.rendered}
+                </motion.h1>
+              </div>
+            </a>
+          </Link>
+        ))}
+      </div>
     </div>
   )
 }
